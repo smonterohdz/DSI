@@ -2,6 +2,7 @@ function [ index ] = jaccard( G,H )
 %JACCARD Jaccard index between two networks
 %   JACCARD(G,H) computes Jaccard index between G and H adjacency matrices
 %   derived from two connectivity networks.
+% 
 %   Input:
 %   'G,H'     - Ajacency networks derived from two connectivty networks
 %   represented by undirected graphs. Both G and H must have the same
