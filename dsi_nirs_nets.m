@@ -62,19 +62,19 @@ path = filename_info.path;
 file = filename_info.file_prefix;
 subject = filename_info.subject_prefix;
 conditions = filename_info.conditions_prefix;
-sys_prefix = filename_info.sys_prefix;
+%sys_prefix = filename_info.sys_prefix;
 nconditions = length(conditions);
 header = filename_info.header;
 
 
 % dataframes for symmetry
 nsamp_symm = n_subj*nconditions;
-dfresults_sym = cell(nsamp_symm,8);
+dfresults_sym = cell(nsamp_symm,7);
 
 % dataframes for individual HbX Complex Brain Measures
 if comp_cbm == 1
     nsamp_cbm = nsamp_symm*2;
-    dfresults_cbm = cell(nsamp_cbm,10);
+    dfresults_cbm = cell(nsamp_cbm,9);
 end
 
 dfisymm = 1;
@@ -82,20 +82,20 @@ dficbm = 1;
 modrep=10;
 nedges = (n_nodes*(n_nodes-1))/2;
 
-for sys = 1:length(sys_prefix)
+%for sys = 1:length(sys_prefix)
     for s=1:n_subj
-        fprintf('S%03d\n',s);
+        fprintf('S%d\n',s);
         for i=1:nconditions
             
-            % Filename format 'am-SUBJ_ID-CONDITION-HBX.csv'
-            if exist([path,file,'-',sprintf('%s%03d-',subject,s),conditions{i},'-',sys_prefix{sys},'-hbo.csv'], 'file') == 2
-                amhbo = csvread([path,file,'-',sprintf('%s%03d-',subject,s),conditions{i},'-',sys_prefix{sys},'-hbo.csv'],header,0);
+            % Filename format 'am-SID-CONDITION-HBX.csv'
+            if exist([path,file,'-',sprintf('%s%d-',subject,s),conditions{i},'-hbo.csv'], 'file') == 2
+                amhbo = csvread([path,file,'-',sprintf('%s%d-',subject,s),conditions{i},'-hbo.csv'],header,0);
             else
-                disp(['Not found ',path,file,'-',sprintf('%s%03d-',subject,s),conditions{i},'-',sys_prefix{sys},'-hbo.csv']);
+                disp(['Not found ',path,file,'-',sprintf('%s%d-',subject,s),conditions{i},'-hbo.csv']);
                 continue;
             end
-            if exist([path,file,'-',sprintf('%s%03d-',subject,s),conditions{i},'-',sys_prefix{sys},'-hbr.csv'], 'file') == 2
-                amhbr = csvread([path,file,'-',sprintf('%s%03d-',subject,s),conditions{i},'-',sys_prefix{sys},'-hbr.csv'],header,0);
+            if exist([path,file,'-',sprintf('%s%d-',subject,s),conditions{i},'-hbr.csv'], 'file') == 2
+                amhbr = csvread([path,file,'-',sprintf('%s%d-',subject,s),conditions{i},'-hbr.csv'],header,0);
             else
                 continue;
             end
@@ -107,7 +107,7 @@ for sys = 1:length(sys_prefix)
             den_hbo = (sum(sum(amhbo))/2)/nedges;
             den_hbr = (sum(sum(amhbr))/2)/nedges;
             
-            dfresults_sym(dfisymm,1) = {sprintf('%s%03d',subject,s)};
+            dfresults_sym(dfisymm,1) = {sprintf('%s%d',subject,s)};
             dfresults_sym(dfisymm,2) = {n_nodes};
             dfresults_sym(dfisymm,3) = {conditions{i}};
             dfresults_sym(dfisymm,4) = {den_hbo};
@@ -115,11 +115,11 @@ for sys = 1:length(sys_prefix)
             dfresults_sym(dfisymm,6) = {symJaccard};
             symBlm = fbil(den_hbo,den_hbr,a);
             dfresults_sym(dfisymm,7) = {abs(symJaccard - symBlm)};
-            dfresults_sym(dfisymm,8) = {sys_prefix{sys}};
+            %dfresults_sym(dfisymm,8) = {sys_prefix{sys}};
             dfisymm = dfisymm +1;
             if comp_cbm == 1
                 %-- CBN for HBO
-                dfresults_cbm(dficbm,1) = {sprintf('%s%03d',subject,s)};
+                dfresults_cbm(dficbm,1) = {sprintf('%s%d',subject,s)};
                 dfresults_cbm(dficbm,2) = {n_nodes};
                 dfresults_cbm(dficbm,3) = {conditions{i}};
                 dfresults_cbm(dficbm,4) = {'HbO'};
@@ -136,11 +136,11 @@ for sys = 1:length(sys_prefix)
                 end
                 mod = mod/modrep;
                 dfresults_cbm(dficbm,9) = {mod};                       %MOD
-                dfresults_cbm(dficbm,10) = {sys_prefix{sys}};
+                %dfresults_cbm(dficbm,10) = {sys_prefix{sys}};
                 dficbm = dficbm +1;
                 
                 %-- CBN for HBR
-                dfresults_cbm(dficbm,1) = {sprintf('%s%03d',subject,s)};
+                dfresults_cbm(dficbm,1) = {sprintf('%s%d',subject,s)};
                 dfresults_cbm(dficbm,2) = {n_nodes};
                 dfresults_cbm(dficbm,3) = {conditions{i}};
                 dfresults_cbm(dficbm,4) = {'HbR'};
@@ -157,16 +157,16 @@ for sys = 1:length(sys_prefix)
                 end
                 mod = mod/modrep;
                 dfresults_cbm(dficbm,9) = {mod};                       %MOD
-                dfresults_cbm(dficbm,10) = {sys_prefix{sys}};
+                %dfresults_cbm(dficbm,10) = {sys_prefix{sys}};
                 dficbm = dficbm +1;
             end
         end
     end
-end
+%end
 
 tbresults_sym = cell2table(dfresults_sym,...
     'VariableNames',{'subj','nodes','condition','denshbo',...
-    'denshhb','jaccardInd','dsi','sys'});
+    'denshhb','jaccardInd','dsi'});
 tbresults_sym.Properties.Description = 'DSI and Jaccard index values in fnirs networks.';
 tbresults_sym.Properties.VariableDescriptions = {
     'Subject ID',...
@@ -175,14 +175,20 @@ tbresults_sym.Properties.VariableDescriptions = {
     'HbO connection density',...
     'HHb connection density',...
     'Jaccard index value',...
-    'DSI value',...
-    'Systemic variables'};
+    'DSI value'};
+idx_empty = cellfun('isempty', tbresults_sym.subj);
+tbresults_sym(idx_empty,:) = [];
+tbresults_sym.nodes = cell2mat(tbresults_sym.nodes);
+tbresults_sym.denshbo = cell2mat(tbresults_sym.denshbo);
+tbresults_sym.denshhb = cell2mat(tbresults_sym.denshhb);
+tbresults_sym.jaccardInd = cell2mat(tbresults_sym.jaccardInd);
+tbresults_sym.dsi = cell2mat(tbresults_sym.dsi);
 
 tbresults_cbm = nan;
 if comp_cbm == 1
     tbresults_cbm = cell2table(dfresults_cbm,...
         'VariableNames',{'subj','nodes','condition','hbx','denshbx',...
-        'tra','cpl','gef','mod','sys'});
+        'tra','cpl','gef','mod'});
     tbresults_cbm.Properties.Description = 'Complex brain measures for fnirs networks.';
     tbresults_cbm.Properties.VariableDescriptions = {
         'Subject ID',...
@@ -193,9 +199,14 @@ if comp_cbm == 1
         'Transitivity',...
         'Characteristic path length',...
         'Global efficiency',...
-        'Modularity',...
-        'Systemic variables'};
+        'Modularity'};
 end
-
+idx_empty = cellfun('isempty', tbresults_cbm.subj);
+tbresults_cbm(idx_empty,:) = [];
+tbresults_cbm.denshbx = cell2mat(tbresults_cbm.denshbx);
+tbresults_cbm.tra = cell2mat(tbresults_cbm.tra);
+tbresults_cbm.cpl = cell2mat(tbresults_cbm.cpl);
+tbresults_cbm.gef = cell2mat(tbresults_cbm.gef); 
+tbresults_cbm.mod = cell2mat(tbresults_cbm.mod);
 disp('Done!');
 end
